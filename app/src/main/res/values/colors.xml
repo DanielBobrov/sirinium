@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Цвета для светлой темы виджетов -->
+    <color name="widget_text_primary_light">#000000</color>
+    <color name="widget_text_secondary_light">#757575</color>
+    <color name="widget_text_error_light">#D32F2F</color>
+    
+    <!-- Базовые цвета для темной темы виджетов (fallback) -->
+    <color name="widget_text_primary_dark">#FFFFFF</color>
+    <color name="widget_text_secondary_dark">#B3FFFFFF</color>
+    <color name="widget_text_error_dark">#FFCDD2</color>
+    
+    <!-- Стили для светлой темы -->
+    <style name="Widget.Sirinium.TextView.Base" parent="android:Widget.TextView">
+        <item name="android:fontFamily">@font/product_sans_regular</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.DateDay" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_text_secondary_light</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.LessonName" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/widget_text_primary_light</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.LessonTime" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_text_secondary_light</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.Classroom" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.Message" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/widget_text_error_light</item>
+    </style>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Цвета для темной темы виджетов -->
+    <color name="widget_text_primary_dark">#FFFFFF</color>
+    <color name="widget_text_secondary_dark">#B3FFFFFF</color>
+    <color name="widget_text_error_dark">#FFCDD2</color>
+    
+    <!-- Стили для темной темы -->
+    <style name="Widget.Sirinium.TextView.Base.Dark" parent="Widget.Sirinium.TextView.Base">
+        <item name="android:fontFamily">@font/product_sans_regular</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.DateDay.Dark" parent="Widget.Sirinium.TextView.Base.Dark">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_text_secondary_dark</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.LessonName.Dark" parent="Widget.Sirinium.TextView.Base.Dark">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/widget_text_primary_dark</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.LessonTime.Dark" parent="Widget.Sirinium.TextView.Base.Dark">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/widget_text_secondary_dark</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.Classroom.Dark" parent="Widget.Sirinium.TextView.Base.Dark">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="Widget.Sirinium.TextView.Message.Dark" parent="Widget.Sirinium.TextView.Base.Dark">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/widget_text_error_dark</item>
+    </style>
+</resources>
+
+

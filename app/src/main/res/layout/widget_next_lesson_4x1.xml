@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widget_root_layout_4x1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="0dp"
+    android:background="@android:color/transparent"> <!-- Фон теперь прозрачный -->
+
+    <LinearLayout
+        android:id="@+id/widget_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@android:color/transparent"> <!-- УДАЛЕНА ССЫЛКА НА widget_background_shape -->
+
+        <LinearLayout
+            android:id="@+id/widget_lesson_details_container_4x1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="12dp"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/widget_tv_date_day_4x1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.Sirinium.TextView.DateDay"
+                    tools:text="Среда, 29 мая" />
+
+                <TextView
+                    android:id="@+id/widget_tv_lesson_name_4x1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    style="@style/Widget.Sirinium.TextView.LessonName"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="Промышленная практика" />
+
+                <TextView
+                    android:id="@+id/widget_tv_lesson_time_4x1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    style="@style/Widget.Sirinium.TextView.LessonTime"
+                    tools:text="09:00 - 10:30" />
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/widget_classroom_container_4x1"
+                android:layout_width="wrap_content"
+                android:minWidth="72dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/widget_tv_classroom_4x1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    style="@style/Widget.Sirinium.TextView.Classroom"
+                    tools:text="К-105" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/widget_tv_message_4x1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/widget_loading"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="?android:attr/textColorPrimary"
+            android:visibility="visible"
+            tools:visibility="visible"
+            tools:text="Нет предстоящих занятий." />
+    </LinearLayout>
+
+</FrameLayout>

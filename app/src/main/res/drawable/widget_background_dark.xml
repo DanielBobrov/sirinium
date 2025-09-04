@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FF1C1B1F" /> <!-- Темно-серый фон для темной темы (пример Material 3 Dark) -->
+    <corners android:radius="16dp" />
+</shape>

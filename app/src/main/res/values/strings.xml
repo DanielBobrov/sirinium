@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Existing strings... -->
+
+    <!-- Widget Descriptions -->
+    <string name="widget_description_2x2">Отображает следующую аудиторию.</string>
+    <string name="widget_description_4x1">Отображает информацию о следующем занятии.</string>
+
+    <!-- Widget Messages (if not already present) -->
+    <string name="widget_loading">Загрузка расписания...</string>
+    <string name="widget_select_group">Выберите группу в настройках приложения.</string>
+    <string name="widget_no_upcoming_lessons">Нет предстоящих занятий.</string>
+    <string name="widget_no_upcoming_lessons_for_period">Нет предстоящих занятий на этот период.</string>
+    <string name="widget_no_lessons_for_group">Нет расписания для выбранной группы.</string>
+    <string name="widget_error_init_failed">Ошибка инициализации виджета. Попробуйте перезапустить приложение.</string>
+    <string name="widget_error_fetching_schedule">Ошибка загрузки расписания.</string>
+    <string name="widget_network_error">Ошибка сети. Проверьте подключение.</string>
+    <string name="widget_update_error">Ошибка обновления виджета.</string>
+
+    <!-- Other existing strings... -->
+    <string name="app_name">Sirinium</string>
+    <string name="refresh">Обновить</string>
+    <string name="settings">Настройки</string>
+    <string name="settings_title">Настройки</string>
+    <string name="navigate_back_description">Назад</string>
+    <string name="previous_week">Предыдущая неделя</string>
+    <string name="next_week">Следующая неделя</string>
+    <string name="current_week">Текущая неделя</string>
+    <string name="no_data_for_group">Нет данных для группы %1$s на эту неделю.</string>
+    <string name="error_loading_data">Ошибка: %1$s</string>
+    <string name="no_lessons_on_date">Нет занятий</string>
+    <string name="open_calendar">Открыть календарь</string>
+    <string name="group_default">К0709-23/1</string>
+    <string name="week_offset_future">Через %1$d нед.</string>
+    <string name="week_offset_past">%1$d нед. назад</string>
+    <string name="location_not_specified">Место не указано</string>
+    <string name="group_not_selected_title">Группа не выбрана</string>
+    <string name="please_select_group_message">Пожалуйста, выберите учебную группу или преподавателя</string>
+    <string name="go_to_settings_to_select_group">Перейдите в настройки, чтобы указать номер группы или ФИО преподавателя.</string>
+    <string name="no_data_for_group_on_week">Нет данных для группы %1$s на выбранную неделю.</string>
+
+    <string name="notification_channel_name">Уведомления о расписании</string>
+    <string name="notification_channel_description">Уведомления о предстоящих занятиях</string>
+
+    <string name="widget_label_next_lesson">Расписание (след. пара)</string>
+    <string name="offline_data_warning">Неактуальное расписание, нет подключения</string>
+
+    <string name="setting_group_title">Учебная группа</string>
+    <string name="group_number_format_label">Номер (формат: 0000-00/0)</string>
+    <string name="group_saved_toast">Группа \'%1$s\' сохранена</string>
+    <string name="save_group_button">Сохранить группу</string>
+    <string name="setting_theme_title">Тема оформления</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Темная</string>
+    <string name="theme_system">Системная</string>
+    <string name="setting_auto_update_title">Автоматическое обновление</string>
+    <string name="enable_auto_update_switch">Включить автообновление</string>
+    <string name="update_interval_minutes_label">Интервал обновления (минуты)</string>
+    <string name="setting_notifications_title">Уведомления о занятиях</string>
+    <string name="enable_notifications_switch">Включить уведомления</string>
+    <string name="notify_lead_time_minutes_label">Уведомлять за (минуты до начала)</string>
+    <string name="setting_about_app_title">О приложении</string>
+    <string name="app_info_name_label">Название</string>
+    <string name="app_info_version_label">Версия</string>
+    <string name="app_info_developer_label">Разработчик</string>
+
+</resources>

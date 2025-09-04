@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"> <!--
+    Базовая тема приложения для светлого режима.
+    В AndroidManifest.xml android:theme="@style/Theme.SiriniumSchedule"
+    должен ссылаться на эту тему.
+    Jetpack Compose будет использовать MaterialTheme, определенную в Theme.kt,
+    но эта XML-тема важна для Activity до того, как Compose UI будет загружен,
+    а также для некоторых системных компонентов.
+    -->
+    <style name="Theme.SiriniumSchedule" parent="android:Theme.Material.Light.NoActionBar">
+        <!--
+            Вы можете настроить здесь базовые атрибуты темы, если это необходимо,
+            но основные цвета и типографика для Compose UI будут управляться
+            из вашего Composable Theme (`SiriniumScheduleTheme` в Theme.kt).
+
+            Для Android 12+ с динамическими цветами Material You,
+            система будет пытаться извлечь цвета из обоев, если это включено
+            в вашем Composable Theme.
+
+            Для соответствия Material 3 и Compose, рекомендуется использовать
+            родительскую тему, такую как Theme.Material3.DayNight.NoActionBar,
+            но для простоты и совместимости с enableEdgeToEdge и прозрачными барами,
+            android:Theme.Material.Light.NoActionBar (или .NoActionBar) часто используется как отправная точка,
+            а Compose сам управляет цветами.
+        -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
+    </style>
+
+
+</resources>
