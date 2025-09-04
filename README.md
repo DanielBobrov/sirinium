@@ -1,13 +1,13 @@
-## Sirinium — расписание Сириус/НТУ (Android)
+## Sirinium — расписание 
 
-![Иконка/баннер](images/aff9fa41-2c67-4ca2-868a-bdb0e83b4e81.webp)
+<img src="images/aff9fa41-2c67-4ca2-868a-bdb0e83b4e81.webp" alt="Иконка/баннер" width="220" />
 
 <a href="https://www.rustore.ru/catalog/app/com.dlab.sirinium" target="_blank">
   <img src="https://upload.wikimedia.org/wikipedia/commons/8/84/RuStore_logo.svg" alt="Доступно в RuStore" height="40" />
   
 </a>
 
-Нативное Android‑приложение для просмотра расписания учебных групп и преподавателей НТУ «Сириус» с виджетами «Следующая пара».
+Нативное Android‑приложение для просмотра расписания учебных групп и преподавателейвиджетами «Следующая пара».
 
 ### Возможности
 - Поиск и выбор группы или преподавателя
@@ -19,14 +19,14 @@
 ### Скриншоты
 Файлы из каталога `images/`:
 
-![Фото 8084](images/photo_5316894093831438084_w.jpg)
-![Фото 8085](images/photo_5316894093831438085_w.jpg)
-![Фото 8086](images/photo_5316894093831438086_w.jpg)
-![Фото 8087](images/photo_5316894093831438087_w.jpg)
-![Фото 8088](images/photo_5316894093831438088_w.jpg)
-![Фото 8089](images/photo_5316894093831438089_w.jpg)
-![Фото 8090](images/photo_5316894093831438090_w.jpg)
-![Фото 8091](images/photo_5316894093831438091_w.jpg)
+<img src="images/photo_5316894093831438084_w.jpg" alt="Фото 8084" width="320" />
+<img src="images/photo_5316894093831438085_w.jpg" alt="Фото 8085" width="320" />
+<img src="images/photo_5316894093831438086_w.jpg" alt="Фото 8086" width="320" />
+<img src="images/photo_5316894093831438087_w.jpg" alt="Фото 8087" width="320" />
+<img src="images/photo_5316894093831438088_w.jpg" alt="Фото 8088" width="320" />
+<img src="images/photo_5316894093831438089_w.jpg" alt="Фото 8089" width="320" />
+<img src="images/photo_5316894093831438090_w.jpg" alt="Фото 8090" width="320" />
+<img src="images/photo_5316894093831438091_w.jpg" alt="Фото 8091" width="320" />
 
 
 ### Виджеты
@@ -68,5 +68,5 @@ PR и Issues приветствуются. Если нашли баг:
 MIT.
 
 ## Разработчики
-
-Список контрибьюторов: [contributors](../../graphs/contributors)
+https://github.com/alphadvolj
+https://github.com/nnqnn
