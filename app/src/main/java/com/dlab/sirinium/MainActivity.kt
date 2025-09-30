@@ -323,7 +323,7 @@ fun SiriniumApp(
         LaunchedEffect(currentGroupSuffix) {
             val groupToSet = if (currentGroupSuffix.isNotBlank()) {
                 // Проверяем, является ли это группой или преподавателем
-                if (currentGroupSuffix.startsWith("К")) {
+                if (currentGroupSuffix.startsWith("К") || currentGroupSuffix.startsWith("И")) {
                     // Это группа с префиксом "К" - используем как есть
                     currentGroupSuffix
                 } else if (currentGroupSuffix.matches(Regex("^\\d+[-/]\\d+$")) || 

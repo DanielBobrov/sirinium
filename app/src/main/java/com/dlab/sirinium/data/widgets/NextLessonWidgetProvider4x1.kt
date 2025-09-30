@@ -9,7 +9,10 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.RemoteViews
+import android.widget.TextView
 import com.dlab.sirinium.MainActivity
 import com.dlab.sirinium.R
 import com.dlab.sirinium.data.UserPreferencesRepository
@@ -27,7 +30,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.time.format.TextStyle
 import java.util.Locale
 
 private const val TAG_WIDGET_4X1 = "NextLessonWidget4x1"
@@ -46,6 +48,8 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
     private val apiDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale("ru"))
     private val apiTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale("ru"))
 
+    val num_lessonss = 3
+
     /**
      * Инициализирует репозитории, если они еще не инициализированы.
      * @param context Контекст приложения.
@@ -61,7 +65,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                 scheduleRepositoryInternal = ScheduleRepository(
                     apiService = RetrofitClient.instance,
                     scheduleDao = scheduleDao,
-                    context = context.applicationContext
+                    context = context
                 )
             }
             return true
@@ -90,6 +94,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                     appWidgetManager = appWidgetManager,
                     appWidgetId = appWidgetId,
                     nextLesson = null,
+                    nextLessons = null,
                     errorMessage = context.getString(R.string.widget_error_init_failed),
                     themeSetting = ThemeSetting.LIGHT // Fallback theme
                 )
@@ -107,6 +112,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
             }
             widgetScope.launch {
                 var nextLesson: ScheduleItem? = null
+                var nextLessons: List<Triple<LocalDateTime, LocalDateTime, ScheduleItem>>? = null
                 var displayMessage: String? = context.getString(R.string.widget_loading)
                 var currentGroupForLog: String? = null
                 var themeSetting: ThemeSetting = ThemeSetting.LIGHT // Инициализация themeSetting здесь
@@ -118,7 +124,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                         Log.w(TAG_WIDGET_4X1, "Group suffix is blank for widget ID $appWidgetId.")
                         displayMessage = context.getString(R.string.widget_select_group)
                     } else {
-                        val isTeacher = !groupSuffix.startsWith("К")
+                        val isTeacher = !(groupSuffix.startsWith("К") || groupSuffix.startsWith("И"))
                         currentGroupForLog = if (isTeacher) {
                             "teacher_$groupSuffix"
                         } else {
@@ -135,19 +141,19 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                             if (displayMessage != context.getString(R.string.widget_loading)) break
 
                             try {
-                                val result = if (!groupSuffix.startsWith("К")) {
+                                val result = if (isTeacher) {
                                     // Teacher selected
                                     scheduleRepositoryInternal.getTeacherSchedule(
                                         teacherId = groupSuffix,
                                         week = weekOffset,
-                                        forceNetwork = false
+                                        forceNetwork = true
                                     )
                                 } else {
                                     // Group selected
                                     scheduleRepositoryInternal.getSchedule(
                                         group = currentGroupForLog,
                                         week = weekOffset,
-                                        forceNetwork = false
+                                        forceNetwork = true
                                     )
                                 }
                                 val awaited = withTimeout(10000L) {
@@ -214,6 +220,12 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                                     startDateTime.isAfter(now)
                                 }?.third
 
+                                nextLessons =
+                                    parsedAndSortedLessons.filter { (startDateTime, _, _) ->
+                                        startDateTime.isAfter(now)
+                                    }.take(num_lessonss)
+
+
                                 if (candidate != null) {
                                     nextLesson = candidate
                                     displayMessage = firstErrorFromRepo
@@ -237,6 +249,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
                         appWidgetManager = appWidgetManager,
                         appWidgetId = appWidgetId,
                         nextLesson = nextLesson,
+                        nextLessons = nextLessons,
                         errorMessage = displayMessage,
                         themeSetting = themeSetting // Передаем настройку темы
                     )
@@ -262,10 +275,21 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
-        newOptions: Bundle?
+        newOptions: Bundle
     ) {
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
         Log.d(TAG_WIDGET_4X1, "onAppWidgetOptionsChanged for widget ID: $appWidgetId")
+        Log.d(TAG_WIDGET_4X1, "onAppWidgetOptionsChanged for widget new: $newOptions")
+
+        val min_width = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+        Log.i(TAG_WIDGET_4X1, "New min_width: $min_width")
+        val min_height = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+        Log.i(TAG_WIDGET_4X1, "New min_height: $min_height")
+        val max_width = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+        Log.i(TAG_WIDGET_4X1, "New min_width: $max_width")
+        val max_height = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)
+        Log.i(TAG_WIDGET_4X1, "New min_height: $max_height")
+
         onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 
@@ -283,6 +307,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
         nextLesson: ScheduleItem?,
+        nextLessons: List<Triple<LocalDateTime, LocalDateTime, ScheduleItem>>?,
         errorMessage: String?,
         themeSetting: ThemeSetting
     ) {
@@ -310,9 +335,97 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
         }
         views.setInt(R.id.widget_content_container, "setBackgroundResource", backgroundResId)
 
+//        if (nextLessons != null) {
+//            val s = nextLessons.size
+//            Log.d(TAG_WIDGET_4X1, "shit is size: $s")
+//            val lessons = RemoteViews(context.packageName, R.id.lessonsContainer)
+//            val lesson_details = LinearLayout(context)
+//
+//            val lesson_container = LinearLayout(lesson_details.context)
+//
+//            val tv_date_day_4x1 = TextView(lesson_container.context)
+//            tv_date_day_4x1.text = "date"
+//            lesson_container.addView(tv_date_day_4x1)
+//            val tv_lesson_name_4x1 = TextView(lesson_container.context)
+//            tv_lesson_name_4x1.text = "lesson name"
+//            lesson_container.addView(tv_lesson_name_4x1)
+//            val tv_lesson_time_4x1 = TextView(lesson_container.context)
+//            tv_lesson_time_4x1.text = "lesson time"
+//            lesson_container.addView(tv_lesson_time_4x1)
+//
+//            lesson_details.addView(lesson_container)
+//
+//            val frame_layout = FrameLayout(lesson_details.context)
+//
+//            val tv_classroom_4x1 = TextView(frame_layout.context)
+//            tv_classroom_4x1.text = "text"
+//            frame_layout.addView(tv_classroom_4x1)
+//
+//            lesson_details.addView(frame_layout)
+//
+//            lessons.addView(lesson_details)
+//            views.setViewVisibility(R.id.lessonsContainer, View.GONE)
+
+//            views.setViewVisibility(R.id.widget_lesson_details_container_4x1, View.VISIBLE)
+//            views.setViewVisibility(R.id.widget_tv_message_4x1, View.VISIBLE)
+
+//            for (i in nextLessons) {
+//                Log.d(TAG_WIDGET_4X1, "shit is: $i")
+//                val nextLesson = i.third
+//                val dateOfLesson = LocalDate.parse(nextLesson.date, apiDateFormatter)
+//                val dayOfWeekText = dateOfLesson.dayOfWeek.getDisplayName(
+//                    java.time.format.TextStyle.FULL,
+//                    Locale("ru")
+//                )
+//                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("ru")) else it.toString() }
+//                val monthText = dateOfLesson.month.getDisplayName(
+//                    java.time.format.TextStyle.FULL_STANDALONE,
+//                    Locale("ru")
+//                )
+//
+//                views.setTextViewText(
+//                    R.id.widget_tv_date_day_4x1,
+//                    "$dayOfWeekText, ${dateOfLesson.dayOfMonth} $monthText"
+//                )
+//                views.setTextViewText(R.id.widget_tv_lesson_name_4x1, nextLesson.discipline ?: "")
+//                views.setTextViewText(
+//                    R.id.widget_tv_lesson_time_4x1,
+//                    "${nextLesson.startTime} - ${nextLesson.endTime}"
+//                )
+//
+//                val classroomText = nextLesson.classroom ?: nextLesson.place ?: ""
+//                if (classroomText.isNotBlank()) {
+//                    views.setTextViewText(R.id.widget_tv_classroom_4x1, classroomText)
+//                    views.setInt(
+//                        R.id.widget_classroom_container_4x1, "setBackgroundResource",
+//                        getLessonBackgroundResource(
+//                            nextLesson.groupType, nextLesson.color,
+//                            (nextLesson.teachers?.size ?: 0) > 1 && nextLesson.code == "6"
+//                        )
+//                    )
+//                    views.setViewVisibility(R.id.widget_classroom_container_4x1, View.VISIBLE)
+//                } else {
+//                    views.setViewVisibility(R.id.widget_classroom_container_4x1, View.GONE)
+//                }
+//
+//                // Устанавливаем цвета текста в зависимости от темы
+//                val textColors = getTextColorsForTheme(context, themeSetting)
+//                views.setInt(R.id.widget_tv_date_day_4x1, "setTextColor", textColors.second)
+//                views.setInt(R.id.widget_tv_lesson_name_4x1, "setTextColor", textColors.first)
+//                views.setInt(R.id.widget_tv_lesson_time_4x1, "setTextColor", textColors.second)
+//                // Номер аудитории всегда белый для контраста с цветным фоном
+//                views.setInt(
+//                    R.id.widget_tv_classroom_4x1,
+//                    "setTextColor",
+//                    context.getColor(android.R.color.white)
+//                )
+//            }
+//        }
+
 
         if (nextLesson != null) {
             views.setViewVisibility(R.id.widget_lesson_details_container_4x1, View.VISIBLE)
+//            R.id.widget_lessons_list
             views.setViewVisibility(R.id.widget_tv_message_4x1, View.GONE)
             val dateOfLesson = LocalDate.parse(nextLesson.date, apiDateFormatter)
             val dayOfWeekText = dateOfLesson.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale("ru"))
@@ -333,7 +446,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
             } else {
                 views.setViewVisibility(R.id.widget_classroom_container_4x1, View.GONE)
             }
-            
+
             // Устанавливаем цвета текста в зависимости от темы
             val textColors = getTextColorsForTheme(context, themeSetting)
             views.setInt(R.id.widget_tv_date_day_4x1, "setTextColor", textColors.second)
@@ -345,7 +458,7 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
             views.setViewVisibility(R.id.widget_lesson_details_container_4x1, View.GONE)
             views.setViewVisibility(R.id.widget_tv_message_4x1, View.VISIBLE)
             views.setTextViewText(R.id.widget_tv_message_4x1, errorMessage ?: context.getString(R.string.widget_no_upcoming_lessons))
-            
+
             // Устанавливаем цвет текста сообщения об ошибке в зависимости от темы
             val messageTextColor = when (themeSetting) {
                 ThemeSetting.LIGHT -> context.getColor(R.color.widget_text_error_light)
@@ -374,14 +487,19 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
-        val pendingIntent = PendingIntent.getActivity(context, appWidgetId, intent, pendingIntentFlags)
+        val pendingIntent =
+            PendingIntent.getActivity(context, appWidgetId, intent, pendingIntentFlags)
         views.setOnClickPendingIntent(R.id.widget_root_layout_4x1, pendingIntent)
 
         try {
             appWidgetManager.updateAppWidget(appWidgetId, views)
             Log.d(TAG_WIDGET_4X1, "Widget $appWidgetId UI actually updated by updateWidgetUi.")
         } catch (e: Exception) {
-            Log.e(TAG_WIDGET_4X1, "Error during final appWidgetManager.updateAppWidget for $appWidgetId: ${e.message}", e)
+            Log.e(
+                TAG_WIDGET_4X1,
+                "Error during final appWidgetManager.updateAppWidget for $appWidgetId: ${e.message}",
+                e
+            )
         }
     }
 
@@ -392,7 +510,11 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
      * @param isCombined Является ли занятие комбинированным (для нескольких преподавателей/кодов).
      * @return ID ресурса drawable для фона.
      */
-    private fun getLessonBackgroundResource(groupType: String?, apiColorStr: String?, isCombined: Boolean): Int {
+    private fun getLessonBackgroundResource(
+        groupType: String?,
+        apiColorStr: String?,
+        isCombined: Boolean
+    ): Int {
         if (isCombined) return R.drawable.widget_rounded_bg_combined
         return when (groupType?.lowercase(Locale.getDefault())) {
             "зачет", "зачёт", "зачет дифференцированный", "зачёт дифференцированный", "экзамен" -> R.drawable.widget_rounded_bg_credit
@@ -410,24 +532,30 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
             }
         }
     }
-    
+
     /**
      * Возвращает цвета текста для указанной темы
      * @param context Контекст приложения
      * @param themeSetting Настройка темы
      * @return Пара с основным (first) и вторичным (second) цветом текста
      */
-    private fun getTextColorsForTheme(context: Context, themeSetting: ThemeSetting): Pair<Int, Int> {
+    private fun getTextColorsForTheme(
+        context: Context,
+        themeSetting: ThemeSetting
+    ): Pair<Int, Int> {
         return when (themeSetting) {
             ThemeSetting.LIGHT -> {
                 context.getColor(R.color.widget_text_primary_light) to context.getColor(R.color.widget_text_secondary_light)
             }
+
             ThemeSetting.DARK -> {
                 context.getColor(R.color.widget_text_primary_dark) to context.getColor(R.color.widget_text_secondary_dark)
             }
+
             ThemeSetting.SYSTEM -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    val nightModeFlags = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                    val nightModeFlags =
+                        context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
                     if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES) {
                         context.getColor(R.color.widget_text_primary_dark) to context.getColor(R.color.widget_text_secondary_dark)
                     } else {
@@ -449,7 +577,10 @@ class NextLessonWidgetProvider4x1 : AppWidgetProvider() {
         if (!initializeDependencies(context)) {
             Log.e(TAG_WIDGET_4X1, "Failed to initialize dependencies in onEnabled.")
         } else {
-            Log.d(TAG_WIDGET_4X1, "Dependencies initialized successfully in onEnabled or already were.")
+            Log.d(
+                TAG_WIDGET_4X1,
+                "Dependencies initialized successfully in onEnabled or already were."
+            )
         }
     }
 

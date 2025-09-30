@@ -117,7 +117,7 @@ class NextLessonWidgetProvider2x2 : AppWidgetProvider() {
                         Log.w(TAG_WIDGET_2X2, "Group suffix is blank for widget ID $appWidgetId.")
                         displayMessage = context.getString(R.string.widget_select_group)
                     } else {
-                        val isTeacher = !groupSuffix.startsWith("К")
+                        val isTeacher = !(groupSuffix.startsWith("К") || groupSuffix.startsWith("И"))
                         currentGroupForLog = if (isTeacher) {
                             "teacher_$groupSuffix"
                         } else {
@@ -134,7 +134,7 @@ class NextLessonWidgetProvider2x2 : AppWidgetProvider() {
                             if (displayMessage != context.getString(R.string.widget_loading)) break
 
                             try {
-                                val result = if (!groupSuffix.startsWith("К")) {
+                                val result = if (!(groupSuffix.startsWith("К") || groupSuffix.startsWith("И"))) {
                                     // Teacher selected
                                     scheduleRepositoryInternal.getTeacherSchedule(
                                         teacherId = groupSuffix,

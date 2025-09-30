@@ -124,7 +124,7 @@ fun MainScreenSettings(
                         icon = Icons.Default.Group
                     ) {
                         val displayName = if (currentGroup.isNotBlank()) {
-                            if (currentGroup.startsWith("К")) {
+                            if (currentGroup.startsWith("К") || currentGroup.startsWith("И")) {
                                 currentGroup
                             } else {
                                 availableTeachers.find { it.first == currentGroup }?.second ?: currentGroup
@@ -155,7 +155,7 @@ fun MainScreenSettings(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = if (currentGroup.startsWith("К")) Icons.Default.School else Icons.Default.Person,
+                                    imageVector = if (currentGroup.startsWith("К") || currentGroup.startsWith("И")) Icons.Default.School else Icons.Default.Person,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)

@@ -177,7 +177,7 @@ class SettingsViewModel(
         
         // Проверяем, является ли выбор группой или преподавателем
         // API требует префикс "К" для групп, поэтому сохраняем полное название группы
-        if (selection.startsWith("К")) {
+        if (selection.startsWith("К") || selection.startsWith("И")) {
             // Это группа - сохраняем полное название как есть
             _groupSuffix.value = selection
             Log.d(TAG_SETTINGS_VM, "Selected group: $selection, saving full group name")
@@ -362,7 +362,7 @@ class SettingsViewModel(
         return if (_groupSuffix.value.isNotBlank()) {
             // Если суффикс уже начинается с "К", то это группа - возвращаем как есть
             // Если нет - то это преподаватель или группа без префикса, добавляем "К"
-            if (_groupSuffix.value.startsWith("К")) {
+            if (_groupSuffix.value.startsWith("К") || _groupSuffix.value.startsWith("И")) {
                 _groupSuffix.value
             } else {
                 "К${_groupSuffix.value}"
@@ -375,7 +375,7 @@ class SettingsViewModel(
     private fun getFullGroupNumberForApi(suffix: String): String {
         // Если суффикс уже начинается с "К", то это группа - возвращаем как есть
         // Если нет - то это преподаватель или группа без префикса, добавляем "К"
-        return if (suffix.startsWith("К")) {
+        return if (suffix.startsWith("К") || suffix.startsWith("И")) {
             suffix
         } else {
             "К$suffix"
@@ -410,11 +410,22 @@ class SettingsViewModel(
                 val groupsArray = JSONArray(groupsResponse)
                 Log.d(TAG_SETTINGS_VM, "Parsed groups JSON array with ${groupsArray.length()} items")
                 val groups = mutableListOf<String>()
+                groups.add("ИОП-ИТ-24/1")
+                groups.add("ИОП-ИТ-24/2")
+                groups.add("ИОП-ИТ-25/1")
+                groups.add("ИОП-ИТ-25/2")
                 
                 for (i in 0 until groupsArray.length()) {
                     val group = groupsArray.getString(i)
                     groups.add(group)
                 }
+
+                for (i in groups) {
+//                    val group = groupsArray.getString(i)
+                    Log.d(TAG_SETTINGS_VM, "Successfully loaded group ${i}")
+                }
+
+
                 Log.d(TAG_SETTINGS_VM, "Successfully loaded ${groups.size} groups")
                 
                 // Загружаем преподавателей

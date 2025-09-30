@@ -406,7 +406,7 @@ fun GroupSelectionDialog(
                 group.contains(searchQuery, ignoreCase = true)
             }
         }
-        Log.d("GroupSelectionDialog", "Filtered groups: ${filtered.size} from ${availableGroups.size}")
+        Log.d("GroupSelectionDialog", "Filtered groups: ${availableGroups.size} from ${availableGroups.size}")
         filtered
     }
     

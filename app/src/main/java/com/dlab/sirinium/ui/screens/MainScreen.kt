@@ -68,7 +68,7 @@ fun MainScreen(
         val groupValue = currentGroupValue
         if (groupValue.isNullOrBlank()) {
             null
-        } else if (groupValue.startsWith("К")) {
+        } else if (groupValue.startsWith("К") || groupValue.startsWith("И")) {
             // Это группа - отображаем как есть
             groupValue
         } else {

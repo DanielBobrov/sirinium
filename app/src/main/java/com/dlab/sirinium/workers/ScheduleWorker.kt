@@ -21,6 +21,7 @@ import com.dlab.sirinium.data.repository.ScheduleRepository
 import com.dlab.sirinium.widgets.NextLessonWidgetProvider2x2 // Импорт нового провайдера виджета
 import com.dlab.sirinium.widgets.NextLessonWidgetProvider4x1 // Импорт нового провайдера виджета
 import android.appwidget.AppWidgetProvider // Импорт AppWidgetProvider
+import android.nfc.Tag
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
@@ -62,6 +63,7 @@ class ScheduleWorker(
      * @return Результат работы воркера (успех, повтор, сбой).
      */
     override suspend fun doWork(): ListenableWorker.Result {
+        Log.i(TAG_WORKER, "Working context n: $appContext")
         Log.i(TAG_WORKER, "doWork started. Attempt: $runAttemptCount")
         var groupForLogging: String? = null
 
@@ -83,7 +85,7 @@ class ScheduleWorker(
                 return ListenableWorker.Result.success()
             }
             // Определяем, является ли текущий выбор группой или преподавателем
-            val isTeacher = !groupSuffix.startsWith("К")
+            val isTeacher = !(groupSuffix.startsWith("К") || groupSuffix.startsWith("И"))
             val groupForLogging = if (isTeacher) {
                 "teacher_$groupSuffix"
             } else {

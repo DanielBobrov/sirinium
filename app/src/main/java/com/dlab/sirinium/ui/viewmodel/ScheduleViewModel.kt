@@ -233,7 +233,7 @@ class ScheduleViewModel(
 
         viewModelScope.launch {
             // Определяем, является ли текущий выбор группой или преподавателем
-            val isTeacher = !groupToLoad.startsWith("К")
+            val isTeacher = !(groupToLoad.startsWith("К") || groupToLoad.startsWith("И"))
             val scheduleFlow = if (isTeacher) {
                 Log.d("ScheduleVM_Fetch", "Fetching teacher schedule for ID: $groupToLoad")
                 repository.getTeacherSchedule(groupToLoad, weekOffsetToLoad, forceNetwork)
