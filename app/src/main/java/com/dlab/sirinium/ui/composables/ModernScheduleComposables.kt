@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -47,9 +48,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import java.time.temporal.ChronoUnit
+import kotlinx.coroutines.flow.filter
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -691,7 +695,7 @@ sealed class BreakType {
     data class Window(val pairsCount: Int) : BreakType()
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ModernDateNavigationBar(
     selectedDate: LocalDate,
@@ -700,15 +704,62 @@ fun ModernDateNavigationBar(
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
-    val datesToShow by remember(selectedDate) {
-        derivedStateOf {
-            (-2..2).map { offset ->
-                selectedDate.plusDays(offset.toLong())
+
+    // Диапазон ±365 дней — выглядит бесконечным
+    val rangeRadius = 365
+    val totalDays = rangeRadius * 2 + 1
+    val rangeStart = remember { today.minusDays(rangeRadius.toLong()) }
+
+    val selectedIndex = remember(selectedDate) {
+        ChronoUnit.DAYS.between(rangeStart, selectedDate).toInt().coerceIn(0, totalDays - 1)
+    }
+
+    // Локальный индекс для подсветки — обновляется в реальном времени при скролле
+    var pendingIndex by remember { mutableIntStateOf(selectedIndex) }
+
+    val itemWidthDp = 52.dp
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex)
+    val coroutineScope = rememberCoroutineScope()
+    val snapBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+
+    // Реальное время: обновляем подсветку по мере скролла
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .collect {
+                val layoutInfo = listState.layoutInfo
+                val viewportCenter =
+                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                val centeredItem = layoutInfo.visibleItemsInfo
+                    .minByOrNull { kotlin.math.abs(it.offset + it.size / 2 - viewportCenter) }
+                centeredItem?.let { pendingIndex = it.index }
             }
+    }
+
+    // После остановки скролла — сообщаем дату во ViewModel (обновляет расписание)
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .filter { !it }
+            .collect {
+                val layoutInfo = listState.layoutInfo
+                val viewportCenter =
+                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
+                val centeredItem = layoutInfo.visibleItemsInfo
+                    .minByOrNull { kotlin.math.abs(it.offset + it.size / 2 - viewportCenter) }
+                centeredItem?.let { item ->
+                    val newDate = rangeStart.plusDays(item.index.toLong())
+                    if (newDate != selectedDate) onDateSelected(newDate)
+                }
+            }
+    }
+
+    // Когда дата меняется внешне (свайп расписания) — синхронизируем pendingIndex и прокручиваем навбар
+    LaunchedEffect(selectedIndex) {
+        pendingIndex = selectedIndex
+        if (!listState.isScrollInProgress) {
+            listState.animateScrollToItem(selectedIndex)
         }
     }
-    
-    // Красивая плавающая панель с датами
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -716,148 +767,154 @@ fun ModernDateNavigationBar(
             .offset(y = (-30).dp),
         contentAlignment = Alignment.BottomCenter
     ) {
-        // Основная панель с градиентным фоном
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(65.dp),
+                .height(72.dp),
             shadowElevation = 6.dp,
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         ) {
-            // Упрощенная рамка
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(1.dp)
-                    .clip(RoundedCornerShape(15.dp))
-                    .background(
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-                    )
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Основной контент
-                Row(
+                // Скролл-слайдер с датами
+                BoxWithConstraints(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+                        .weight(1f)
+                        .fillMaxHeight()
                 ) {
-                    datesToShow.forEach { dateItem ->
-                        val isSelected = dateItem == selectedDate
-                        val isToday = dateItem == today
-                        
-                        val backgroundColor by animateColorAsState(
-                            targetValue = when {
-                                isSelected -> MaterialTheme.colorScheme.primaryContainer
-                                isToday -> MaterialTheme.colorScheme.secondaryContainer
-                                else -> MaterialTheme.colorScheme.surface
-                            },
-                            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
-                            label = "backgroundColor"
-                        )
-                        
-                        val textColor by animateColorAsState(
-                            targetValue = when {
-                                isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
-                                isToday -> MaterialTheme.colorScheme.onSecondaryContainer
-                                else -> MaterialTheme.colorScheme.onSurface
-                            },
-                            animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
-                            label = "textColor"
-                        )
-                        
-                        val scale by animateFloatAsState(
-                            targetValue = if (isSelected) 1.1f else 1.0f,
-                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-                            label = "scale"
-                        )
-                        
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    if (dateItem != selectedDate) {
-                                        onDateSelected(dateItem)
-                                    }
-                                }
-                                .padding(vertical = 4.dp)
-                                .graphicsLayer(scaleX = scale, scaleY = scale)
-                        ) {
-                            // Дата без круга
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = dateItem.dayOfMonth.toString(),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
-                                    color = textColor
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(2.dp))
-                            
-                            // День недели с улучшенной типографикой
-                            Text(
-                                text = dateItem.format(DateTimeFormatter.ofPattern("EEE", Locale("ru"))).uppercase(Locale("ru")),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
-                                color = textColor,
-                                textAlign = TextAlign.Center,
-                                maxLines = 1
+                    // Отступы по бокам центрируют активный элемент в LazyRow
+                    val sidePadding = (maxWidth - itemWidthDp) / 2
+
+                    LazyRow(
+                        state = listState,
+                        flingBehavior = snapBehavior,
+                        contentPadding = PaddingValues(horizontal = sidePadding),
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        items(totalDays) { index ->
+                            val dateItem = rangeStart.plusDays(index.toLong())
+                            val isSelected = index == pendingIndex
+                            val isToday = dateItem == today
+
+                            val circleBgColor by animateColorAsState(
+                                targetValue = if (isSelected) MaterialTheme.colorScheme.primary
+                                              else Color.Transparent,
+                                animationSpec = tween(3, easing = FastOutSlowInEasing),
+                                label = "circleBg"
                             )
-                            
-                            // Индикатор выбранной даты
-                            if (isSelected) {
-                                Spacer(modifier = Modifier.height(1.dp))
+                            val circleBorderColor by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> MaterialTheme.colorScheme.primary
+                                    isToday    -> MaterialTheme.colorScheme.primary
+                                    else       -> Color.Transparent
+                                },
+                                animationSpec = tween(3, easing = FastOutSlowInEasing),
+                                label = "circleBorder"
+                            )
+                            val numberColor by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> MaterialTheme.colorScheme.onPrimary
+                                    isToday    -> MaterialTheme.colorScheme.primary
+                                    else       -> MaterialTheme.colorScheme.onSurface
+                                },
+                                animationSpec = tween(3, easing = FastOutSlowInEasing),
+                                label = "numberColor"
+                            )
+                            val labelColor by animateColorAsState(
+                                targetValue = when {
+                                    isSelected -> MaterialTheme.colorScheme.primary
+                                    isToday    -> MaterialTheme.colorScheme.primary
+                                    else       -> MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                                animationSpec = tween(3, easing = FastOutSlowInEasing),
+                                label = "labelColor"
+                            )
+                            val scale by animateFloatAsState(
+                                targetValue = if (isSelected) 1.1f else 1.0f,
+                                animationSpec = tween(300, easing = FastOutSlowInEasing),
+                                label = "scale"
+                            )
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .width(itemWidthDp)
+                                    .fillMaxHeight()
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        coroutineScope.launch {
+                                            listState.animateScrollToItem(index)
+                                        }
+                                    }
+                                    .graphicsLayer(scaleX = scale, scaleY = scale)
+                            ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(2.dp)
-                                        .background(
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(1.dp)
-                                        )
+                                        .size(32.dp)
+                                        .background(circleBgColor, CircleShape)
+                                        .border(1.5.dp, circleBorderColor, CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = dateItem.dayOfMonth.toString(),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isSelected || isToday) FontWeight.Bold
+                                                     else FontWeight.Normal,
+                                        color = numberColor
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = dateItem.format(
+                                        DateTimeFormatter.ofPattern("EEE", Locale("ru"))
+                                    ).uppercase(Locale("ru")),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = if (isSelected || isToday) FontWeight.Bold
+                                                 else FontWeight.Normal,
+                                    color = labelColor,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 1
                                 )
                             }
                         }
                     }
-                    
-                    // Разделитель
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(35.dp)
-                            .background(
-                                MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                                RoundedCornerShape(0.5.dp)
-                            )
-                    )
-                    
-                    // Кнопка календаря
-                    Box(
-                        modifier = Modifier
-                            .weight(0.8f)
-                            .size(24.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onCalendarIconClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Filled.CalendarMonth,
-                            contentDescription = "Открыть календарь",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(14.dp)
+                }
+
+                // Разделитель
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(35.dp)
+                        .background(
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            RoundedCornerShape(0.5.dp)
                         )
-                    }
+                )
+
+                // Кнопка календаря
+                Box(
+                    modifier = Modifier
+                        .width(48.dp)
+                        .fillMaxHeight()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { onCalendarIconClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.CalendarMonth,
+                        contentDescription = "Открыть календарь",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
