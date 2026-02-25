@@ -396,7 +396,7 @@ fun ModernScheduleItemCard(item: ScheduleItem, isCombined: Boolean, modifier: Mo
                 modifier = Modifier
                     .width(80.dp)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(20.dp))
                     .background(lessonColor)
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -468,11 +468,9 @@ fun ModernScheduleItemCard(item: ScheduleItem, isCombined: Boolean, modifier: Mo
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Информация о группе (вместо преподавателя)
+                // Группа
                 if (item.group.isNotBlank()) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Filled.School,
                             contentDescription = "Группа",
@@ -490,7 +488,31 @@ fun ModernScheduleItemCard(item: ScheduleItem, isCombined: Boolean, modifier: Mo
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                 }
-                
+
+                // Преподаватель
+                val teacherName = (item.teacherDetails?.fio
+                    ?: item.teachers?.values?.firstOrNull()?.fio)
+                    ?.takeIf { it.isNotBlank() }
+                if (teacherName != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = "Преподаватель",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = teacherName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+
                 // Информация о месте проведения
                 val locationParts = mutableListOf<String>()
                 item.classroom?.takeIf { it.isNotBlank() }?.let { locationParts.add(it) }
