@@ -726,14 +726,15 @@ fun ModernDateNavigationBar(
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
+    var currentSelectedDate = selectedDate
 
     // Диапазон ±365 дней — выглядит бесконечным
     val rangeRadius = 365
     val totalDays = rangeRadius * 2 + 1
     val rangeStart = remember { today.minusDays(rangeRadius.toLong()) }
 
-    val selectedIndex = remember(selectedDate) {
-        ChronoUnit.DAYS.between(rangeStart, selectedDate).toInt().coerceIn(0, totalDays - 1)
+    val selectedIndex = remember(currentSelectedDate) {
+        ChronoUnit.DAYS.between(rangeStart, currentSelectedDate).toInt().coerceIn(0, totalDays - 1)
     }
 
     // Локальный индекс для подсветки — обновляется в реальном времени при скролле
@@ -769,7 +770,10 @@ fun ModernDateNavigationBar(
                     .minByOrNull { kotlin.math.abs(it.offset + it.size / 2 - viewportCenter) }
                 centeredItem?.let { item ->
                     val newDate = rangeStart.plusDays(item.index.toLong())
-                    if (newDate != selectedDate) onDateSelected(newDate)
+                    if (newDate != currentSelectedDate) {
+                        onDateSelected(newDate)
+                        currentSelectedDate = newDate
+                    }
                 }
             }
     }
