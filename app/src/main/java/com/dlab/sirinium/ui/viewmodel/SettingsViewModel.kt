@@ -79,8 +79,8 @@ class SettingsViewModel(
     // Используем appName и appVersion как и раньше, если они не должны браться из BuildConfig/strings.xml
     // Если должны, то нужно применить предыдущие рекомендации по BuildConfig.VERSION_NAME и app.getString(R.string.app_name)
     val appName: String = "Sirinium" // Если нужно из strings.xml: app.getString(R.string.app_name)
-    val appVersion: String = "2.0.0"      // Если нужно из BuildConfig: BuildConfig.VERSION_NAME
-    val developerName: String = "d.lab"
+    val appVersion: String = "2.1.0 SpecotaEdition"      // Если нужно из BuildConfig: BuildConfig.VERSION_NAME
+    val developerName: String = "d.lab&Oxy"
 
     init {
         Log.d(TAG_SETTINGS_VM, "Initializing and loading preferences...")
